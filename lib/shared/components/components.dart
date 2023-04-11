@@ -1,3 +1,4 @@
+import 'package:app_expertise/main.dart';
 import 'package:flutter/material.dart';
 
 Widget defaultFormField({
@@ -69,3 +70,24 @@ Widget defaultBotton({
         ),
       ),
     );
+
+void navPush(context, widget){
+  Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => widget,
+      )
+  );
+}
+
+Widget buildListItem(Map<String, dynamic> record) {
+  var unique = record['__last_update'] as String;
+  unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
+  final avatarUrl =
+      '${client.baseURL}/web/image?model=res.partner&field=image_128&id=${record["id"]}&unique=$unique';
+  return ListTile(
+    leading: CircleAvatar(backgroundImage: NetworkImage(avatarUrl)),
+    title: Text(record['name']),
+    subtitle: Text(record['email'] is String ? record['email'] : ''),
+  );
+}
