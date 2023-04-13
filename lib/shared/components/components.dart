@@ -1,4 +1,5 @@
 import 'package:app_expertise/main.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 Widget defaultFormField({
@@ -84,10 +85,83 @@ Widget buildListItem(Map<String, dynamic> record) {
   var unique = record['__last_update'] as String;
   unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
   final avatarUrl =
-      '${client.baseURL}/web/image?model=res.partner&field=image_128&id=${record["id"]}&unique=$unique';
-  return ListTile(
-    leading: CircleAvatar(backgroundImage: NetworkImage(avatarUrl)),
-    title: Text(record['name']),
-    subtitle: Text(record['email'] is String ? record['email'] : ''),
+      'assets/images/img.jpg';
+      //'${client.baseURL}/web/image?model=res.partner&field=avatar_128&id=${record["id"]}&unique=$unique';
+      //print(avatarUrl);
+  return Padding(
+    padding: const EdgeInsets.all(20.0),
+    child: Row(
+      children: [
+        Container(
+          width: 90,
+          height: 90,
+          child: CircleAvatar(backgroundImage: AssetImage(avatarUrl)),
+          // decoration: BoxDecoration(
+          //     borderRadius: BorderRadius.circular(10),
+          //     image: DecorationImage(
+          //       image: AssetImage(avatarUrl),
+          //       fit: BoxFit.cover,
+          //     )),
+        ),
+        SizedBox(
+          width: 20,
+        ),
+        Expanded(
+          child: Container(
+            height: 90,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${record['name']}',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                  maxLines: 2,
+                ),
+                SizedBox(height: 5,),
+                Text(
+                  '${record['email']}',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[500]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  //   ListTile(
+  //   leading: CircleAvatar(backgroundImage: AssetImage(avatarUrl)),
+  //   title: Text(record['name']),
+  //   subtitle: Text(record['email'] is String ? record['email'] : ''),
+  // );
+}
+
+Widget buildContectItem(){
+  return Row(
+    children: [
+      CircleAvatar(
+
+      ),
+    ],
+  );
+}
+
+Widget buildSeparator() {
+  return Padding(
+    padding: const EdgeInsetsDirectional.only(start: 20),
+    child: Container(
+      width: double.infinity,
+      height: 1,
+      color: Colors.grey[500],
+    ),
   );
 }
