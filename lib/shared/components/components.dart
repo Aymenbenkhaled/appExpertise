@@ -1,4 +1,6 @@
 import 'package:app_expertise/main.dart';
+import 'package:app_expertise/modules/contact/contact_screen.dart';
+import 'package:app_expertise/shared/cubit/cubit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -81,60 +83,79 @@ void navPush(context, widget){
   );
 }
 
-Widget buildListItem(Map<String, dynamic> record) {
+Widget buildListItem(Map<String, dynamic> record, context) {
+  var cubit = AppCubit.get(context);
   var unique = record['__last_update'] as String;
   unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
   final avatarUrl =
       'assets/images/img.jpg';
       //'${client.baseURL}/web/image?model=res.partner&field=avatar_128&id=${record["id"]}&unique=$unique';
-      //print(avatarUrl);
-  return Padding(
-    padding: const EdgeInsets.all(20.0),
-    child: Row(
-      children: [
-        Container(
-          width: 90,
-          height: 90,
-          child: CircleAvatar(backgroundImage: AssetImage(avatarUrl)),
-          // decoration: BoxDecoration(
-          //     borderRadius: BorderRadius.circular(10),
-          //     image: DecorationImage(
-          //       image: AssetImage(avatarUrl),
-          //       fit: BoxFit.cover,
-          //     )),
-        ),
-        SizedBox(
-          width: 20,
-        ),
-        Expanded(
-          child: Container(
-            height: 90,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${record['name']}',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                  maxLines: 2,
-                ),
-                SizedBox(height: 5,),
-                Text(
-                  '${record['email']}',
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[500]),
-                ),
-              ],
+      //print(avatarUrl);;
+  
+  return GestureDetector(
+    onTap: () {
+      navPush(context, ContactScreen(record));
+    },
+    onLongPress: () {
+      cubit.updateContact(record);
+    },
+    child: Dismissible(
+      key: Key(record['id'].toString()),
+      onDismissed: (direction) {
+        print(record['id']);
+        print(direction);
+        },
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              child: CircleAvatar(
+                backgroundImage: AssetImage(avatarUrl),
+              ),
+              // decoration: BoxDecoration(
+              //     borderRadius: BorderRadius.circular(10),
+              //     image: DecorationImage(
+              //       image: AssetImage(avatarUrl),
+              //       fit: BoxFit.cover,
+              //     )),
             ),
-          ),
+            SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: Container(
+                height: 80,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${record['name']}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                      maxLines: 1,
+                    ),
+                    SizedBox(height: 10,),
+                    Text(
+                      '${record['email']}',
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[500]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     ),
   );
 

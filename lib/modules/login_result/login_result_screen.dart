@@ -61,7 +61,7 @@ class LoginResultScreen extends StatelessWidget {
                                   controller: nameController,
                                   type: TextInputType.text,
                                   label: 'Contact Name',
-                                  prefIcon: Icons.title,
+                                  prefIcon: Icons.person,
                                   validate: (value) {
                                     if (value!.isEmpty) {
                                       return 'Name empty';
@@ -75,7 +75,7 @@ class LoginResultScreen extends StatelessWidget {
                                   controller: emailController,
                                   type: TextInputType.text,
                                   label: 'Contact Email',
-                                  prefIcon: Icons.title,
+                                  prefIcon: Icons.email,
                                   validate: (value) {
                                     if (value!.isEmpty) {
                                       return 'Name empty';
@@ -89,7 +89,7 @@ class LoginResultScreen extends StatelessWidget {
                                   controller: phoneController,
                                   type: TextInputType.text,
                                   label: 'Contact Phone',
-                                  prefIcon: Icons.title,
+                                  prefIcon: Icons.phone,
                                   validate: (value) {
                                     if (value!.isEmpty) {
                                       return 'Name empty';
@@ -126,7 +126,7 @@ class LoginResultScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final record =
                               snapshot.data[index] as Map<String, dynamic>;
-                              return buildListItem(record);
+                              return buildListItem(record,context);
                             },
                             separatorBuilder: (context, index) => buildSeparator());
                       } else {
@@ -140,49 +140,5 @@ class LoginResultScreen extends StatelessWidget {
         );
       },
     );
-
-    //   Scaffold(
-    //   appBar: AppBar(
-    //     leading: IconButton(
-    //       onPressed: (){
-    //         Navigator.pop(context);
-    //       },
-    //       icon: Icon(
-    //           Icons.arrow_back_ios_new
-    //       ),
-    //     ),
-    //     title: Text(
-    //       'Login Resluts',
-    //     ),
-    //   ),
-    //   body: Center(
-    //     child: Column(
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       children: [
-    //         Text(
-    //           '$email',
-    //           style: TextStyle(
-    //             fontWeight: FontWeight.bold,
-    //             fontSize: 25,
-    //           ),
-    //         ),
-    //         Text(
-    //           '$password',
-    //           style: TextStyle(
-    //             fontWeight: FontWeight.bold,
-    //             fontSize: 25,
-    //           ),
-    //         ),
-    //         Text(
-    //           '$liste',
-    //           style: TextStyle(
-    //             fontWeight: FontWeight.bold,
-    //             fontSize: 25,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }

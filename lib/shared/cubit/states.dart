@@ -8,4 +8,6 @@ class AppFetchContactState extends AppStates{}
 
 class AppCreateContactState extends AppStates{}
 
+class AppUpdateContactState extends AppStates{}
+
 class AppChageBottomSheetState extends AppStates{}

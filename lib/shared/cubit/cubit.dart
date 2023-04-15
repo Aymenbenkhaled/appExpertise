@@ -11,6 +11,8 @@ class AppCubit extends Cubit<AppStates>{
 
   static AppCubit get(context) => BlocProvider.of(context);
 
+  bool darkLight = true;
+
   bool b = false;
 
   bool isVisible = true;
@@ -62,33 +64,36 @@ class AppCubit extends Cubit<AppStates>{
       ],
       'kwargs': {},
     }).then((value) {
-     print('sayiiiiiiiiiiiiii');
+     print('sayiiiiiiiiiiiiii $value');
      emit(AppCreateContactState());
      fetchContacts();
      emit(AppFetchContactState());
+
      partner_id = value;
    }
     ).catchError((er)=>print(er));
   }
-void updateContact() async{
+void updateContact(Map<String,dynamic> record) async{
+    partner_id = record['id'];
   await client.callKw({
     'model': 'res.partner',
     'method': 'write',
     'args': [
-      'partner_id',
+      partner_id,
       {
         'is_company': true,
-        'name' : 'Ben Aymen',
-        'email' : 'Benkhaled_aymen@hotmail.fr',
+        //'name' : 'Ben Aymen',
+        'email' : 'a.benkhaled@esi-sba.dz',
         'phone' : '0667879845',
         //'image_1920' : 'assets/images/img.jpg'
       },
     ],
     'kwargs': {},
   }).then((value) {
+    emit(AppUpdateContactState());
+    print('contact updated');
     fetchContacts();
     emit(AppFetchContactState());
-    print('contact updated');
   });
 }
 
