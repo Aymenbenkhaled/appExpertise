@@ -93,6 +93,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Center(
                           child: defaultBotton(
+                            //width: double.infinity,
+                            //radius: 0,
                             function: () {
                               if (formKea.currentState!.validate()) {
                                  client.authenticate(
@@ -133,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Text(
                                 'Register',
                                 style: TextStyle(
-                                  color: Colors.blueAccent,
+                                  color: Colors.deepOrange,
                                 ),
                               ),
                             ),

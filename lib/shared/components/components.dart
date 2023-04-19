@@ -1,8 +1,10 @@
 import 'package:app_expertise/main.dart';
 import 'package:app_expertise/modules/contact/contact_screen.dart';
 import 'package:app_expertise/shared/cubit/cubit.dart';
+import 'package:app_expertise/shared/cubit/states.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 Widget defaultFormField({
   required TextEditingController controller,
@@ -19,35 +21,42 @@ Widget defaultFormField({
   Function()? suffpressd,
   //required String text,
 }) =>
-    TextFormField(
-      controller: controller,
-      keyboardType: type,
-      onFieldSubmitted: onSubmit,
-      onChanged: onChange,
-      validator: validate,
-      obscureText: obscureText,
-      onTap: onTap,
-      decoration: InputDecoration(
-        prefixIcon: Icon(
-          prefIcon,
-        ),
-        suffixIcon: IconButton(
-          onPressed: suffpressd,
-          icon: Icon(
-            suffIcon,
+    BlocConsumer<AppCubit,AppStates>(
+      listener: (context, state) {
+      },
+      builder: (context, state) {
+        return TextFormField(
+          controller: controller,
+          keyboardType: type,
+          onFieldSubmitted: onSubmit,
+          onChanged: onChange,
+          validator: validate,
+          obscureText: obscureText,
+          onTap: onTap,
+          decoration: InputDecoration(
+            prefixIcon: Icon(
+              prefIcon,
+            ),
+            suffixIcon: IconButton(
+              onPressed: suffpressd,
+              icon: Icon(
+                suffIcon,
+              ),
+            ),
+            labelText: label,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(radius),
+              gapPadding: 10,
+            ),
           ),
-        ),
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(radius),
-        ),
-      ),
+        );
+      },
     );
 
 Widget defaultBotton({
   double width = 200,
   double radius = 30,
-  Color background = Colors.lightBlueAccent,
+  //Color background = Colors.lightBlueAccent,
   bool isUpperCase = true,
   required Function function,
   required String text,
@@ -56,7 +65,7 @@ Widget defaultBotton({
     Container(
       width: width,
       decoration: BoxDecoration(
-        color: background,
+        color: Colors.deepOrange[900],
         borderRadius: BorderRadius.circular(radius),
       ),
       child: MaterialButton(
@@ -88,22 +97,22 @@ Widget buildListItem(Map<String, dynamic> record, context) {
   var unique = record['__last_update'] as String;
   unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
   final avatarUrl =
-      'assets/images/img.jpg';
-      //'${client.baseURL}/web/image?model=res.partner&field=avatar_128&id=${record["id"]}&unique=$unique';
+      //'assets/images/img.jpg';
+      '${client.baseURL}/web/image?model=res.partner&field=avatar_128&id=${record["id"]}&unique=$unique';
       //print(avatarUrl);;
   
   return GestureDetector(
     onTap: () {
       navPush(context, ContactScreen(record));
     },
-    onLongPress: () {
-      cubit.updateContact(record);
-    },
+    // onLongPress: () {
+    //   cubit.updateContact(record);
+    // },
     child: Dismissible(
-      key: Key(record['id'].toString()),
+      key: UniqueKey(),
       onDismissed: (direction) {
         print(record['id']);
-        print(direction);
+        print(client.baseURL);
         },
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -112,8 +121,10 @@ Widget buildListItem(Map<String, dynamic> record, context) {
             Container(
               width: 80,
               height: 80,
-              child: CircleAvatar(
-                backgroundImage: AssetImage(avatarUrl),
+              child: CachedNetworkImage(
+                imageUrl: avatarUrl,
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) {return Icon(Icons.error);},
               ),
               // decoration: BoxDecoration(
               //     borderRadius: BorderRadius.circular(10),
@@ -143,7 +154,7 @@ Widget buildListItem(Map<String, dynamic> record, context) {
                     ),
                     SizedBox(height: 10,),
                     Text(
-                      '${record['email']}',
+                      '${record['phone']}',
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -185,4 +196,26 @@ Widget buildSeparator() {
       color: Colors.grey[500],
     ),
   );
+}
+
+class ImageBuilder extends StatelessWidget {
+  const ImageBuilder({
+    Key? key,
+    required this.imagePath,
+    this.imgWidth = 200,
+    this.imgheight = 200,
+  }) : super(key: key);
+
+  final String imagePath;
+  final double imgWidth;
+  final double imgheight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      imagePath,
+      width: imgWidth,
+      height: imgheight,
+    );
+  }
 }

@@ -19,6 +19,8 @@ dependencies:
   hexcolor: ^3.0.1
   shared_preferences: ^2.1.0
   cached_network_image: ^3.2.3
+  printing: ^5.10.3
+  path_provider: ^2.0.14
 
 dev_dependencies:
   flutter_test:

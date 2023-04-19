@@ -28,9 +28,8 @@ class LoginResultScreen extends StatelessWidget {
         if (state is AppCreateContactState) Navigator.pop(context);
       },
       builder: (context, state) {
-        return BlocConsumer<AppCubit,AppStates>(
-          listener: (context, state) {
-          },
+        return BlocConsumer<AppCubit, AppStates>(
+          listener: (context, state) {},
           builder: (context, state) {
             var cubit = AppCubit.get(context);
             return Scaffold(
@@ -43,72 +42,79 @@ class LoginResultScreen extends StatelessWidget {
                         cubit.createContact(
                             name: nameController.text,
                             email: emailController.text,
-                            phone: phoneController.text
-                        );
+                            phone: phoneController.text);
                       }
                     } else {
                       scaffoldKey.currentState!
                           .showBottomSheet(
-                            (context) => Container(
-                          padding: EdgeInsetsDirectional.all(20),
-                          color: Colors.grey[200],
-                          child: Form(
-                            key: formKey,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                defaultFormField(
-                                  controller: nameController,
-                                  type: TextInputType.text,
-                                  label: 'Contact Name',
-                                  prefIcon: Icons.person,
-                                  validate: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Name empty';
-                                    }
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                defaultFormField(
-                                  controller: emailController,
-                                  type: TextInputType.text,
-                                  label: 'Contact Email',
-                                  prefIcon: Icons.email,
-                                  validate: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Name empty';
-                                    }
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                defaultFormField(
-                                  controller: phoneController,
-                                  type: TextInputType.text,
-                                  label: 'Contact Phone',
-                                  prefIcon: Icons.phone,
-                                  validate: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Name empty';
-                                    }
-                                  },
-                                ),
-                              ],
+                            shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(30))
                             ),
-                          ),
-                        ),
-                      )
+                            //backgroundColor: Colors.grey[300],
+                            (context) => Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Form(
+                                key: formKey,
+                                child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        defaultFormField(
+                                          radius: 20,
+                                          controller: nameController,
+                                          type: TextInputType.text,
+                                          label: 'Contact Name',
+                                          prefIcon: Icons.person,
+                                          validate: (value) {
+                                            if (value!.isEmpty) {
+                                              return 'Name empty';
+                                            }
+                                          },
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        defaultFormField(
+                                          radius: 20,
+                                          controller: emailController,
+                                          type: TextInputType.text,
+                                          label: 'Contact Email',
+                                          prefIcon: Icons.email,
+                                          validate: (value) {
+                                            if (value!.isEmpty) {
+                                              return 'Name empty';
+                                            }
+                                          },
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        defaultFormField(
+                                          radius: 20,
+                                          controller: phoneController,
+                                          type: TextInputType.text,
+                                          label: 'Contact Phone',
+                                          prefIcon: Icons.phone,
+                                          validate: (value) {
+                                            if (value!.isEmpty) {
+                                              return 'Name empty';
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                ),
+                            ),
+                          )
                           .closed
                           .then((value) {
-                        cubit.ChangeBottomSheetState(icon: Icons.edit, boll: false);
+                        cubit.ChangeBottomSheetState(
+                            icon: Icons.edit, boll: false);
                       });
                       cubit.ChangeBottomSheetState(icon: Icons.add, boll: true);
-
                     }
-                  };
+                  }
+                  ;
                 },
                 child: Icon(cubit.fabIcon),
               ),
@@ -118,19 +124,21 @@ class LoginResultScreen extends StatelessWidget {
               body: Center(
                 child: FutureBuilder(
                     future: cubit.fetchContacts(),
-                    builder:
-                        (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                    builder: (BuildContext context,
+                        AsyncSnapshot<dynamic> snapshot) {
                       if (snapshot.hasData) {
                         return ListView.separated(
                             itemCount: snapshot.data.length,
                             itemBuilder: (context, index) {
                               final record =
-                              snapshot.data[index] as Map<String, dynamic>;
-                              return buildListItem(record,context);
+                                  snapshot.data[index] as Map<String, dynamic>;
+                              return buildListItem(record, context);
                             },
-                            separatorBuilder: (context, index) => buildSeparator());
+                            separatorBuilder: (context, index) =>
+                                buildSeparator());
                       } else {
-                        if (snapshot.hasError) return Text('Unable to fetch data');
+                        if (snapshot.hasError)
+                          return Text('Unable to fetch data');
                         return CircularProgressIndicator();
                       }
                     }),

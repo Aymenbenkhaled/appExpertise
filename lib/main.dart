@@ -42,6 +42,7 @@ void main()  {
   // print('Installed modules: \n' + res.toString());
   Bloc.observer = MyBlocObserver();
   runApp(MainApp(client));
+
 }
 
 class MainApp extends StatelessWidget {
@@ -120,8 +121,17 @@ class MainApp extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     overflow: TextOverflow.ellipsis),
               ),
+              //hintColor: Colors.white,
+              inputDecorationTheme: InputDecorationTheme(
+                fillColor: Colors.grey[500],
+                filled: true
+              ),
+              bottomSheetTheme: BottomSheetThemeData(
+                backgroundColor: Colors.grey[600],
+
+              ),
             ),
-            themeMode: cubit.darkLight == true ? ThemeMode.light : ThemeMode.dark,
+            themeMode: cubit.darkLight == true ? ThemeMode.dark : ThemeMode.dark,
             debugShowCheckedModeBanner: false,
             home: LoginScreen(),
           );
