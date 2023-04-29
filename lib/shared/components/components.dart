@@ -91,14 +91,23 @@ void navPush(context, widget){
       )
   );
 }
+void navPushAndFinish(context, widget){
+  Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => widget,
+      ),
+    (Route<dynamic> route) => false,
+  );
+}
 
-Widget buildListItem(Map<String, dynamic> record, context) {
-  var cubit = AppCubit.get(context);
-  var unique = record['__last_update'] as String;
-  unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
+Widget buildListItem(record, context) {
+  //var cubit = AppCubit.get(context);
+  //var unique = record['__last_update'] as String;
+  //unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
   final avatarUrl =
       //'assets/images/img.jpg';
-      '${client.baseURL}/web/image?model=res.partner&field=avatar_128&id=${record["id"]}&unique=$unique';
+      '${client.baseURL}/web/image?model=res.partner&field=image_128&id=${record["id"]}';
       //print(avatarUrl);;
   
   return GestureDetector(

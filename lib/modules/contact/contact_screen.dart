@@ -93,8 +93,10 @@ class ContactScreen extends StatelessWidget {
                                 record: record,
                                 name: nameController.text,
                                 phone: phoneController.text,
-                                email: emailController.text);
+                                email: emailController.text
+                            );
                             Navigator.pop(context);
+                            cubit.fetchContacts();
                           },
                           text: 'UPDATE'
                       ),

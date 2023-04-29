@@ -1,7 +1,11 @@
 import 'dart:io';
 
 import 'package:app_expertise/main.dart';
+import 'package:app_expertise/modules/login/login_screen.dart';
+import 'package:app_expertise/modules/login_result/login_result_screen.dart';
 import 'package:app_expertise/modules/printable_data/printable_data.dart';
+import 'package:app_expertise/shared/components/components.dart';
+import 'package:app_expertise/shared/network/local/cache_helper.dart';
 import 'package:bloc/bloc.dart';
 import 'package:app_expertise/shared/cubit/states.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,19 +40,65 @@ class AppCubit extends Cubit<AppStates> {
   // final image_field =
   // session.serverVersionInt >= 13 ? 'image_128' : 'image_small';
 
+  Map<String,dynamic>? record;
+
+  void authentifiaction(emailController, passwordController, context) {
+    emit(AppAuthLoadingState());
+    client
+        .authenticate('o15_sandbox_demo', '${emailController.text}',
+            '${passwordController.text}')
+        .then((value) async {
+      print(value);
+      //cubit.b = true;
+      final res = await client.callRPC('/web/session/modules', 'call', {});
+      //cubit.fetchContacts();
+      CacheHelper.putData(key: 'isLogin', value: true).then((value) {
+        if (value)
+          navPushAndFinish(
+              context,
+              LoginResultScreen(
+                liste: res,
+                email: 'emailController.text',
+                password: 'passwordController.text',
+              ));
+      });
+      emit(AppAuthSuccessState());
+    }).catchError((onError) {
+      emit(AppAuthErrorState());
+    });
+  }
+var r;
   Future<dynamic> fetchContacts() async {
-    return await client.callKw({
+    return  r = await client.callKw({
       'model': 'res.partner',
       'method': 'search_read',
       'args': [],
       'kwargs': {
         'context': {'bin_size': true},
         'domain': [],
-        'fields': ['id', 'name', 'email', 'phone', '__last_update', 'image_1920'],
+        'fields': [
+          'id',
+          'name',
+          'email',
+          'phone',
+          '__last_update',
+          'image_1920'
+        ],
         'limit': 80,
       },
     });
+
+    // .then((value) {
+    //   record = value;
+    //   print('sssssssssssss :  ${record[3]}');
+    //   //emit(AppFetchContactState());
+    // });
   }
+
+  Future<dynamic> getRecord() {
+    return Future(() => print('aaaaaa ${record}'));
+  }
+
   Future<dynamic> fetchFacturation() async {
     return await client.callKw({
       'model': 'account.move',
@@ -57,7 +107,7 @@ class AppCubit extends Cubit<AppStates> {
       'kwargs': {
         'context': {'bin_size': true},
         'domain': [],
-        'fields': ['id', 'name', 'email', '__last_update', 'avatar_128'],
+        'fields': ['id', 'name', 'email', '__last_update', 'image_128'],
         'limit': 80,
       },
     });
@@ -89,8 +139,7 @@ class AppCubit extends Cubit<AppStates> {
       print('sayiiiiiiiiiiiiii $value');
       emit(AppCreateContactState());
       fetchContacts();
-      emit(AppFetchContactState());
-
+      //emit(AppFetchContactState());
       partner_id = value;
     }).catchError((er) => print(er));
   }
@@ -104,12 +153,12 @@ class AppCubit extends Cubit<AppStates> {
     // print(name);
     //print(phone);
     // print(email);
-     var namee;
-     var phonee;
-     var emaill;
-     name == '' ? namee = record['name'] : namee = name;
-     phone == '' ? phonee = record['phone'] : phonee = phone;
-     email == '' ? emaill = record['email'] : emaill = email;
+    var namee;
+    var phonee;
+    var emaill;
+    name == '' ? namee = record['name'] : namee = name;
+    phone == '' ? phonee = record['phone'] : phonee = phone;
+    email == '' ? emaill = record['email'] : emaill = email;
     await client.callKw({
       'model': 'res.partner',
       'method': 'write',
@@ -117,9 +166,9 @@ class AppCubit extends Cubit<AppStates> {
         partner_id,
         {
           'is_company': true,
-          'name' : '$namee',
-          'phone' : '$phonee',
-          'email' : '$emaill',
+          'name': '$namee',
+          'phone': '$phonee',
+          'email': '$emaill',
           //'image_1920' : 'assets/images/img.jpg'
         },
       ],
@@ -128,7 +177,7 @@ class AppCubit extends Cubit<AppStates> {
       emit(AppUpdateContactState());
       print('contact updated');
       fetchContacts();
-      emit(AppFetchContactState());
+      //emit(AppFetchContactState());
     });
   }
 
@@ -158,46 +207,35 @@ class AppCubit extends Cubit<AppStates> {
             child: pw.Column(
               mainAxisAlignment: pw.MainAxisAlignment.center,
               children: [
-                pw.Image(
-                  image,
-                  width: 200,
-                  height: 200
+                pw.Image(image, width: 200, height: 200),
+                pw.Text('${record['id']}', style: pw.TextStyle(fontSize: 30)),
+                pw.Text('${record['name']}', style: pw.TextStyle(fontSize: 30)),
+                pw.Text('${record['email']}',
+                    style: pw.TextStyle(fontSize: 30)),
+                pw.Text('${record['phone']}',
+                    style: pw.TextStyle(fontSize: 30)),
+                pw.SizedBox(
+                  height: 50,
                 ),
-                pw.Text(
-                  '${record['id']}',
-                  style: pw.TextStyle(
-                    fontSize: 30
-                  )
-                ),
-                pw.Text(
-                    '${record['name']}',
-                    style: pw.TextStyle(
-                        fontSize: 30
-                    )
-                ),
-                pw.Text(
-                    '${record['email']}',
-                    style: pw.TextStyle(
-                        fontSize: 30
-                    )
-                ),
-                pw.Text(
-                    '${record['phone']}',
-                    style: pw.TextStyle(
-                        fontSize: 30
-                    )
-                ),
-                pw.SizedBox(height: 50,),
               ],
             ),
           );
-        })
-    );
+        }));
     await Printing.layoutPdf(
         onLayout: (PdfPageFormat format) async => doc.save());
   }
 
+  var list =[] ;
+
+  void getSearch(searchValue) {
+
+    list = [];
+    emit(AppGetSearchLoadingState());
+    if (searchValue!='')
+    for (var element in r) {
+      if (element['name'].toLowerCase().contains(searchValue.toLowerCase())) list.add(element);
+    }
+
+  }
 
 }
-
-

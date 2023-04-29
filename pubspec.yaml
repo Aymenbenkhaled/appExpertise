@@ -21,6 +21,8 @@ dependencies:
   cached_network_image: ^3.2.3
   printing: ^5.10.3
   path_provider: ^2.0.14
+  fluttertoast: ^8.2.1
+  cherry_toast: ^1.2.0
 
 dev_dependencies:
   flutter_test:

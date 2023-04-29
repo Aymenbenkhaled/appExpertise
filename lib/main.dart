@@ -1,8 +1,10 @@
 import 'package:app_expertise/layout/app_layout.dart';
 import 'package:app_expertise/modules/login/login_screen.dart';
+import 'package:app_expertise/modules/login_result/login_result_screen.dart';
 import 'package:app_expertise/shared/bloc_observer.dart';
 import 'package:app_expertise/shared/cubit/cubit.dart';
 import 'package:app_expertise/shared/cubit/states.dart';
+import 'package:app_expertise/shared/network/local/cache_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,19 +36,23 @@ var subscription = client.sessionStream.listen(sessionChanged);
 var loginSubscription = client.loginStream.listen(loginStateChanged);
 var inRequestSubscription = client.inRequestStream.listen(inRequestChanged);
 
-void main()  {
+void main()  async{
   WidgetsFlutterBinding.ensureInitialized();
   // await client.authenticate(
   //     'o15_sandbox_demo', 'benkhaled.aymen', 'P@\$\$w0rd@@ym3n');
   // final res = await client.callRPC('/web/session/modules', 'call', {});
   // print('Installed modules: \n' + res.toString());
   Bloc.observer = MyBlocObserver();
-  runApp(MainApp(client));
+  await CacheHelper.init();
+  bool isLogin = CacheHelper.getData(key: 'isLogin');
+  print(isLogin);
+  runApp(MainApp(client,isLogin));
 
 }
 
 class MainApp extends StatelessWidget {
-  MainApp(OdooClient client);
+  final bool isLogin;
+  MainApp(OdooClient client,this.isLogin);
 
   @override
   Widget build(BuildContext context) {
@@ -131,9 +137,9 @@ class MainApp extends StatelessWidget {
 
               ),
             ),
-            themeMode: cubit.darkLight == true ? ThemeMode.dark : ThemeMode.dark,
+            themeMode: cubit.darkLight == true ? ThemeMode.light : ThemeMode.dark,
             debugShowCheckedModeBanner: false,
-            home: LoginScreen(),
+            home: false ? LoginResultScreen(liste: [], email: '', password: '') : LoginScreen(),
           );
         }
       ),
