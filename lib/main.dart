@@ -8,13 +8,14 @@ import 'package:app_expertise/shared/network/local/cache_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:odoo_rpc/odoo_rpc.dart';
 
 
 void sessionChanged(OdooSession sessionId) async {
   print('We got new session ID: ' + sessionId.id);
-  // write to persistent storage
+  await SessionManager().set('session', sessionId);
 }
 
 void loginStateChanged(OdooLoginEvent event) async {
@@ -31,23 +32,21 @@ void inRequestChanged(bool event) async {
   if (!event) print('Request is finished'); // hide progress indicator
 }
 
-final client = OdooClient('http://146.59.159.198:4515');
+
+dynamic sessionn = SessionManager().get("session");
+final client = OdooClient('https://de79-154-121-41-29.ngrok-free.app');
+
 var subscription = client.sessionStream.listen(sessionChanged);
 var loginSubscription = client.loginStream.listen(loginStateChanged);
 var inRequestSubscription = client.inRequestStream.listen(inRequestChanged);
 
 void main()  async{
   WidgetsFlutterBinding.ensureInitialized();
-  // await client.authenticate(
-  //     'o15_sandbox_demo', 'benkhaled.aymen', 'P@\$\$w0rd@@ym3n');
-  // final res = await client.callRPC('/web/session/modules', 'call', {});
-  // print('Installed modules: \n' + res.toString());
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
   bool isLogin = CacheHelper.getData(key: 'isLogin');
-  print(isLogin);
+  //print(isLogin);
   runApp(MainApp(client,isLogin));
-
 }
 
 class MainApp extends StatelessWidget {
@@ -139,7 +138,7 @@ class MainApp extends StatelessWidget {
             ),
             themeMode: cubit.darkLight == true ? ThemeMode.light : ThemeMode.dark,
             debugShowCheckedModeBanner: false,
-            home: false ? LoginResultScreen(liste: [], email: '', password: '') : LoginScreen(),
+            home: isLogin ? LoginResultScreen() : LoginScreen(),
           );
         }
       ),

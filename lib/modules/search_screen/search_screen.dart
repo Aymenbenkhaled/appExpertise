@@ -56,7 +56,7 @@ class SearchScreen extends StatelessWidget {
                     );
                   },
                   fallback: (context) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child: Text('No Data'));
                   },
                 ),
               )

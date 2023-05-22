@@ -1,5 +1,6 @@
 import 'package:app_expertise/main.dart';
 import 'package:app_expertise/modules/contact/contact_screen.dart';
+import 'package:app_expertise/modules/facturation/facturation_screen.dart';
 import 'package:app_expertise/shared/cubit/cubit.dart';
 import 'package:app_expertise/shared/cubit/states.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -55,7 +56,9 @@ Widget defaultFormField({
 
 Widget defaultBotton({
   double width = 200,
+  double? height,
   double radius = 30,
+  double textSize = 30,
   //Color background = Colors.lightBlueAccent,
   bool isUpperCase = true,
   required Function function,
@@ -64,6 +67,7 @@ Widget defaultBotton({
 }) =>
     Container(
       width: width,
+      height: height,
       decoration: BoxDecoration(
         color: Colors.deepOrange[900],
         borderRadius: BorderRadius.circular(radius),
@@ -76,7 +80,7 @@ Widget defaultBotton({
         child: Text(
           isUpperCase ? text.toUpperCase() : text,
           style: TextStyle(
-            fontSize: 25,
+            fontSize: textSize,
             color: Colors.white,
           ),
         ),
@@ -103,11 +107,11 @@ void navPushAndFinish(context, widget){
 
 Widget buildListItem(record, context) {
   //var cubit = AppCubit.get(context);
-  //var unique = record['__last_update'] as String;
-  //unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
+  var unique = record['__last_update'] as String;
+  unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
   final avatarUrl =
       //'assets/images/img.jpg';
-      '${client.baseURL}/web/image?model=res.partner&field=image_128&id=${record["id"]}';
+      '${client.baseURL}/web/image?model=res.partner&field=image_1920&id=${record["id"]}&unique=$unique';
       //print(avatarUrl);;
   
   return GestureDetector(
