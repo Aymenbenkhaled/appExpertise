@@ -23,3 +23,17 @@ class AppGetSearchLoadingState extends AppStates{}
 class AppGetSearchSuccessState extends AppStates{}
 
 class AppGetSearchErrorState extends AppStates{}
+
+class AppCreateDbState extends AppStates{}
+
+class AppInsertToDbState extends AppStates{}
+
+class AppLoadingState extends AppStates{}
+
+class AppGetFromDbState extends AppStates{}
+
+class AppUpdateDataFromDbState extends AppStates{}
+
+class AppDeleteDataFromDbState extends AppStates{}
+
+class AppSyncDataFromLocalDbState extends AppStates{}

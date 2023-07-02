@@ -95,7 +95,7 @@ class FacturationScreen extends StatelessWidget {
                                 phone: phoneController.text,
                                 email: emailController.text);
                             Navigator.pop(context);
-                            cubit.fetchContacts();
+                            //cubit.fetchContacts();
                           },
                           text: 'UPDATE'),
                     ],

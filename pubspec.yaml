@@ -24,6 +24,13 @@ dependencies:
   fluttertoast: ^8.2.1
   cherry_toast: ^1.2.0
   flutter_session_manager: ^1.0.3
+  odoo: ^0.0.2
+  http: ^0.13.4
+  image_picker: ^0.8.9
+  sqflite: ^2.2.8+4
+  connectivity_plus: 2.3.6+1
+  internet_connection_checker: ^1.0.0+1
+  dio: ^4.0.6
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:app_expertise/main.dart';
@@ -18,12 +20,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:sqflite/sqflite.dart';
 
 class AppCubit extends Cubit<AppStates> {
   AppCubit()
       : super(
           AppInitialState(),
         );
+
 
   static AppCubit get(context) => BlocProvider.of(context);
   bool darkLight = true;
@@ -35,42 +42,74 @@ class AppCubit extends Cubit<AppStates> {
     emit(AppChangePswVisibilityState());
   }
 
+  late final headers;
   void authentifiaction(emailController, passwordController, context) async {
+
+    bool isLogin = CacheHelper.getData(key: 'isLogin');
     emit(AppAuthLoadingState());
-    await client
-        .authenticate(
-            'test_aymen', '${emailController}', '${passwordController}')
-        .then((value) async {
-      final res = await client.callRPC('/web/session/modules', 'call', {});
-      CacheHelper.saveData(key: 'username', value: emailController);
-      CacheHelper.saveData(key: 'password', value: passwordController);
-      CacheHelper.putData(key: 'isLogin', value: true).then((value) {
-        if (value)
-          navPushAndFinish(
-              context,
-              LoginResultScreen()
-          );
+    // if (isLogin) {
+    //     await client
+    //         .authenticate(
+    //             'test_aymen', '${emailController}', '${passwordController}')
+    //         .then((value) async {
+    //           final res = await client.callRPC('/web/session/modules', 'call', {});
+    //           print('zzzzzzzzzzz ${value.id}');
+    //           CacheHelper.putData(key: 'direction', value: false);
+    //           emit(AppAuthSuccessState());
+    //           final session = value;
+    //       image_field = session.serverVersionInt >= 13 ? 'image_1920' : 'image_small';
+    //     }).catchError((onError) {
+    //       print('the error of Auth : ${onError}');
+    //       emit(AppAuthErrorState());
+    //     });
+    //   } else {
+      await client
+          .authenticate(
+          'test_aymen', '${emailController}', '${passwordController}')
+          .then((value) async {
+        final res = await client.callRPC('/web/session/modules', 'call', {});
+        CacheHelper.saveData(key: 'username', value: emailController);
+        CacheHelper.saveData(key: 'password', value: passwordController);
+        CacheHelper.saveData(key: 'sessionId', value: value.id);
+        CacheHelper.putData(key: 'isLogin', value: true).then((value) {
+          if (value) {
+            navPushAndFinish(
+                context,
+                LoginResultScreen()
+            );
+          }
+        });
+        emit(AppAuthSuccessState());
+      }).catchError((onError) {
+        print('the error of Auth : ${onError}');
+        emit(AppAuthErrorState());
       });
-      emit(AppAuthSuccessState());
-    }).catchError((onError) {
-      print('the error of Auth : ${onError}');
-      emit(AppAuthErrorState());
-    });
+   // }
   }
 
   var r = [];
+  late final image_field;
 
   Future<dynamic> fetchContacts() async {
     bool isLogin = CacheHelper.getData(key: 'isLogin');
     String username = CacheHelper.getData(key: 'username');
     String password = CacheHelper.getData(key: 'password');
+    final s = CacheHelper.getData(key: 'sessionId');
+    print('aaaaaaaaaaaaaaaaaaaaaa $s');
     print('${username} ///////// ${password}');
+
     if (isLogin) {
       await client
           .authenticate(
               'test_aymen', '${username}', '${password}')
           .then((value) async {
-      }).catchError((onError) {});
+            print('zzzzzzzzzzz ${value.id}');
+            //header = value;
+            //clientt = OdooClient('https://ab87-197-203-125-207.ngrok-free.app',value);
+            // ssession = value;
+            // final session = value;
+        //image_field = session.serverVersionInt >= 13 ? 'image_1920' : 'image_small';
+      }).catchError((onError) {print(onError);});
     }
     return r = await client.callKw({
       'model': 'res.partner',
@@ -85,22 +124,16 @@ class AppCubit extends Cubit<AppStates> {
           'email',
           'phone',
           '__last_update',
+          'avatar_128',
+          'image_128',
           'image_1920'
         ],
         'limit': 80,
       },
     });
-    //     .then((value) {
-    // r=value;
-    // print(r);
-    // }).catchError((onError)=> print(onError));
-
-    // .then((value) {
-    //   record = value;
-    //   print('sssssssssssss :  ${record[3]}');
-    //   //emit(AppFetchContactState());
-    // });
   }
+
+
 
   Future<dynamic> getRecord() {
     return Future(() => print('aaaaaa ${r}'));
@@ -142,6 +175,28 @@ class AppCubit extends Cubit<AppStates> {
     required String email,
     required String phone,
   }) async {
+    bool isLogin = CacheHelper.getData(key: 'isLogin');
+    String username = CacheHelper.getData(key: 'username');
+    String password = CacheHelper.getData(key: 'password');
+    final s = CacheHelper.getData(key: 'sessionId');
+    print('aaaaaaaaaaaaaaaaaaaaaa $s');
+    print('${username} ///////// ${password}');
+
+    if (isLogin) {
+      await client
+          .authenticate(
+          'test_aymen', '${username}', '${password}')
+          .then((value) async {
+        print('zzzzzzzzzzz ${value.id}');
+        //header = value;
+        //clientt = OdooClient('https://ab87-197-203-125-207.ngrok-free.app',value);
+        // ssession = value;
+        // final session = value;
+        //image_field = session.serverVersionInt >= 13 ? 'image_1920' : 'image_small';
+      }).catchError((onError) {
+        print(onError);
+      });
+    }
     await client.callKw({
       'model': 'res.partner',
       'method': 'create',
@@ -160,7 +215,9 @@ class AppCubit extends Cubit<AppStates> {
       //fetchContacts();
       //emit(AppFetchContactState());
       partner_id = value;
-    }).catchError((er) => print(er));
+    }).catchError((er) => print('the errrrrrrrrrrrrrroooooor iss : ${er}'));
+
+
   }
 
   void updateContact(
@@ -210,10 +267,19 @@ class AppCubit extends Cubit<AppStates> {
   }
 
   Future<void> printDoc(record) async {
-    final image = await imageFromAssetBundle(
-      "assets/images/img2.jpg",
+    var unique = record['__last_update'] as String;
+    String sess = CacheHelper.getData(key: 'sessionId');
+    final headers = {
+      'Cookie': 'session_id=$sess',
+    };
+    unique = unique.replaceAll(RegExp(r'[^0-9]'), '');
+    final avatarUrl =
+    //'assets/images/img.jpg';
+        '${client.baseURL}/web/image?model=res.partner&id=${record["id"]}&field=avatar_128&unique=$unique';
+    final image = await networkImage(
+        "$avatarUrl",
+        headers: headers
     );
-
     final doc = pw.Document();
     //final output = await getTemporaryDirectory();
     //final file = File('${output.path}/example2.pdf');
@@ -290,4 +356,181 @@ class AppCubit extends Cubit<AppStates> {
           list.add(element);
       }
   }
+
+  File? image;
+  String? base64Image;
+  String? _avatarImage;
+  final picker = ImagePicker();
+
+  Future getImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        image = File(pickedFile.path);
+        base64Image = base64Encode(image!.readAsBytesSync());
+
+      }
+  }
+
+  void updateContactImage(
+      {required Map<String, dynamic> record}) async {
+    partner_id = record['id'];
+    // print(name);
+    //print(phone);
+    // print(email);
+
+    //var emaill;
+
+    //email == '' ? emaill = record['email'] : emaill = email;
+    await client.callKw({
+      'model': 'res.partner',
+      'method': 'write',
+      'args': [
+        partner_id,
+        {
+          'image_1920': base64Image,
+          //'image_1920' : 'assets/images/img.jpg'
+        },
+      ],
+      'kwargs': {},
+    }).then((value) {
+      emit(AppUpdateContactState());
+      print('Image updated');
+      //fetchContacts();
+      //emit(AppFetchContactState());
+    });
+  }
+
+  late Database db;
+
+  void createDb() {
+    openDatabase(
+      'myDB.db',
+      version: 1,
+      onCreate: (db, version) {
+        print('db created');
+        db
+            .execute(
+            'CREATE TABLE tasks (id INTEGER PRIMARY KEY,name TEXT,email TEXT,phone TEXT,status TEXT)')
+            .then((value) {
+          print('table created');
+        }).catchError((error) {
+          print('the error is ${error.toString()}');
+        });
+      },
+      onOpen: (db) {
+        getDataFromDb(db);
+        print('db Opened');
+      },
+    ).then((value) {
+      db = value;
+      emit(AppCreateDbState());
+    });
+  }
+
+  Future insertToDb({
+    required String name,
+    required String email,
+    required String phone,
+  }) async {
+    return await db.transaction((txn) {
+      txn
+          .rawInsert(
+          'INSERT INTO tasks(name,email,phone,status) VALUES ("$name","$email","$phone","new")')
+          .then((value) {
+        print('$value inserted successfully');
+        emit(AppInsertToDbState());
+        getDataFromDb(db);
+      }).catchError((error) {
+        print('the error of insertion is ${error.toString()}');
+      });
+      return Future(() => null);
+    });
+  }
+
+  List<Map> tasks = [];
+
+  void getDataFromDb(db) {
+    tasks = [];
+    emit(AppLoadingState());
+    db.rawQuery('SELECT * FROM tasks').then((value) {
+      value.forEach((element) {
+          tasks.add(element);
+      });
+      emit(AppGetFromDbState());
+    });
+  }
+
+  void updateDataFromDb({
+    required String status,
+    required int id,
+  }) async {
+    db.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?',
+        ['$status', id]).then((value) {
+      getDataFromDb(db);
+      emit(AppUpdateDataFromDbState());
+    });
+  }
+
+  void deleteDataFromDb({
+    required int id
+  }){
+    db.rawDelete(
+        'DELETE FROM tasks WHERE id = ?', [id]
+    ).then((value) {
+      getDataFromDb(db);
+      emit(AppDeleteDataFromDbState());
+    });
+  }
+
+  Future<void> synchronizeData(client , dataToSync) async {
+    //final client = OdooClient('http://your-odoo-server-url.com');
+    await client.authenticate('test_aymen', 'benkhaled_aymen@hotmail.fr', 'odoodbaymen');
+
+    for (final data in dataToSync) {
+      //final model = 'res.partner';
+      //final recordId = data['id'];
+
+      //if (recordId == null) {
+        final result = await client.callKw({
+          'model': 'res.partner',
+          'method': 'create',
+          'args': [
+            {
+              'name': data['name'],
+              //'avatar_128' : 'http://146.59.159.198:4515/web/image?model=res.partner&field=avatar_128&id=7',
+              'email': data['email'],
+              'phone': data['phone']
+            },
+          ],
+          'kwargs': {},
+        });
+        deleteDataFromDb(id: data['id']);
+        print('insert doneeeeeeeeeeeeeeee $result');
+        //if (result.isSuccess()) {
+          //print(' Update the record ID in the local database');
+          //final db = await database;
+          //await db.update(table, {'id': result.getResult()}, where: 'name = ?', whereArgs: [data['name']]);
+        //} else {
+          //print('Failed to create record: ${result.getErrorMessage()}');
+        //}
+      // } else {
+      //   final result = await client.callKw({
+      //     'model': model,
+      //     'method': 'write',
+      //     'args': [
+      //       [recordId],
+      //       data,
+      //     ],
+      //     'kwargs': {},
+      //   });
+      //
+      //   if (!result.isSuccess()) {
+      //     print('Failed to update record: ${result.getErrorMessage()}');
+      //   }
+      // }
+    }
+    emit(AppSyncDataFromLocalDbState());
+  }
+
 }

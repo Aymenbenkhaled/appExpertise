@@ -1,3 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:app_expertise/shared/network/remote/dio_helper.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 import 'package:app_expertise/layout/app_layout.dart';
 import 'package:app_expertise/modules/login/login_screen.dart';
 import 'package:app_expertise/modules/login_result/login_result_screen.dart';
@@ -10,12 +16,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:odoo_rpc/odoo_rpc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 void sessionChanged(OdooSession sessionId) async {
   print('We got new session ID: ' + sessionId.id);
-  await SessionManager().set('session', sessionId);
+  //store_session_somehow(sessionId);
 }
 
 void loginStateChanged(OdooLoginEvent event) async {
@@ -32,20 +40,29 @@ void inRequestChanged(bool event) async {
   if (!event) print('Request is finished'); // hide progress indicator
 }
 
+final sessionId = CacheHelper.getData(key: 'sessionId');
+OdooSession sessionsave = CacheHelper.getData(key: 'isLogin');
 
-dynamic sessionn = SessionManager().get("session");
-final client = OdooClient('https://de79-154-121-41-29.ngrok-free.app');
+final client = OdooClient('http://192.168.1.36:8069');
 
-var subscription = client.sessionStream.listen(sessionChanged);
+
+var subscriptionn = client.sessionStream.listen(sessionChanged);
 var loginSubscription = client.loginStream.listen(loginStateChanged);
 var inRequestSubscription = client.inRequestStream.listen(inRequestChanged);
 
-void main()  async{
+late StreamSubscription subscription;
+bool isDeviceConnected = false;
+bool isAlertSet = false;
+
+
+
+void main(context)  async{
   WidgetsFlutterBinding.ensureInitialized();
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
+  DioHelper.init();
   bool isLogin = CacheHelper.getData(key: 'isLogin');
-  //print(isLogin);
+  print(isLogin);
   runApp(MainApp(client,isLogin));
 }
 
@@ -56,9 +73,10 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => AppCubit(),
+      create: (BuildContext context) => AppCubit()..createDb(),
       child: BlocConsumer<AppCubit, AppStates>(
-        listener: (context, state) {},
+        listener: (context, state) {
+        },
         builder: (context, state) {
           var cubit = AppCubit.get(context);
           return MaterialApp(

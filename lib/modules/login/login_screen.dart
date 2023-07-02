@@ -11,13 +11,8 @@ import 'package:odoo_rpc/odoo_rpc.dart';
 import '../../main.dart';
 
 
-class LoginScreen extends StatefulWidget
+class LoginScreen extends StatelessWidget
 {
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
   var emailController = TextEditingController();
 
   var passwordController = TextEditingController();

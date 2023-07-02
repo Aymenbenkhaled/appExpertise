@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app_expertise/main.dart';
@@ -7,36 +8,110 @@ import 'package:app_expertise/shared/components/components.dart';
 import 'package:app_expertise/shared/cubit/cubit.dart';
 import 'package:app_expertise/shared/cubit/states.dart';
 import 'package:app_expertise/shared/network/local/cache_helper.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_session_manager/flutter_session_manager.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:odoo_rpc/odoo_rpc.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:sqflite/sqflite.dart';
 
-class LoginResultScreen extends StatelessWidget {
-
-
-  var scaffoldKey = GlobalKey<ScaffoldState>();
-  var formKey = GlobalKey<FormState>();
-  var nameController = TextEditingController();
-  var emailController = TextEditingController();
-  var phoneController = TextEditingController();
-  // var rr = [];
-  // void getr() async{
-  //    rr = await SessionManager().get("value");
-  // }
+class LoginResultScreen extends StatefulWidget {
 
   @override
+  State<LoginResultScreen> createState() => _LoginResultScreenState();
+}
+
+class _LoginResultScreenState extends State<LoginResultScreen> {
+  var scaffoldKey = GlobalKey<ScaffoldState>();
+
+  var formKey = GlobalKey<FormState>();
+
+  var nameController = TextEditingController();
+
+  var emailController = TextEditingController();
+
+  var phoneController = TextEditingController();
+
+
+  @override
+  void initState() {
+    getConnectivity();
+    super.initState();
+  }
+
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+            (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          print('connection : $isDeviceConnected');
+          // for (var element in cubitt.tasks) {
+          //   print('ddddddddddddddd ${element[1]}');
+          //   cubitt.createContact(
+          //     name: element['name'],
+          //     email: element['email'],
+          //     phone: element['phone'],
+          //     isConnect: isDeviceConnected,
+          //   );
+          //   cubitt.deleteDataFromDb(id: element['id']);
+          // }
+
+          setState(() {
+          },);
+          if (!isDeviceConnected) {
+            //showDialogBox();
+            setState(() => isAlertSet = true);
+          }
+        },
+      );
+
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
+
+  // var rr = [];
+  @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AppCubit, AppStates>(
-      listener: (context, state) {
-        if (state is AppCreateContactState) Navigator.pop(context);
-      },
-      builder: (context, state) {
         return BlocConsumer<AppCubit, AppStates>(
-          listener: (context, state) {},
+          listener: (context, state) {
+            if (state is AppCreateContactState) {
+              Navigator.pop(context);
+            } else if (state is AppSyncDataFromLocalDbState) Fluttertoast.showToast(
+              msg: "Data Synchronized Successfully",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+          },
           builder: (context, state) {
             var cubit = AppCubit.get(context);
-            //getr();
+        //     print(cubit.tasks.length);
+        //     if(cubit.tasks.length > 0) {
+        //   cubit
+        //       .synchronizeData(client, cubit.tasks)
+        //       .then((value) => print('dddddddddddddooooone'))
+        //       .catchError((onError) => print('nnnnnnnnnoooot ddone $onError'));
+        // }
+        //for (var element in cubit.tasks) {
+             //    print('ddddddddddddddd ${element['name']}');
+             //    cubit.createContact(
+             //      name: element['name'],
+             //      email: element['email'],
+             //      phone: element['phone'],
+             //    );
+             //    //cubit.deleteDataFromDb(id: element['id']);
+             //  }
+            bool isLogin = CacheHelper.getData(key: 'isLogin');
             return Scaffold(
               key: scaffoldKey,
               floatingActionButton: FloatingActionButton(
@@ -44,10 +119,20 @@ class LoginResultScreen extends StatelessWidget {
                   {
                     if (cubit.bol) {
                       if (formKey.currentState!.validate()) {
-                        cubit.createContact(
+                        if(isDeviceConnected){
+                          cubit.createContact(
                             name: nameController.text,
                             email: emailController.text,
-                            phone: phoneController.text);
+                            phone: phoneController.text,
+                          );
+                        }else{
+                          cubit.insertToDb(
+                              name: nameController.text,
+                              email: emailController.text,
+                              phone: phoneController.text
+                          );
+                        }
+
                       }
                     } else {
                       scaffoldKey.currentState!
@@ -138,6 +223,13 @@ class LoginResultScreen extends StatelessWidget {
                       size: 30,
                     ),
                   ),
+                  IconButton(
+                    onPressed: () => cubit.synchronizeData(client, cubit.tasks),
+                    icon: Icon(
+                      Icons.sync,
+                      size: 30,
+                    ),
+                  ),
                   defaultBotton(
                     function: () async {
                       try {
@@ -147,6 +239,7 @@ class LoginResultScreen extends StatelessWidget {
                         CacheHelper.putData(key: 'isLogin', value: false);
                         CacheHelper.saveData(key: 'username', value: '');
                         CacheHelper.saveData(key: 'password', value: '');
+                        CacheHelper.saveData(key: 'sessionId', value: '');
                         navPushAndFinish(context, LoginScreen());
                       } on OdooException catch (e) {
                         // Cleanup on odoo exception
@@ -162,24 +255,23 @@ class LoginResultScreen extends StatelessWidget {
                     width: 80,
                     height: 10,
                     textSize: 11,
-                  )
+                  ),
                 ],
               ),
-              // body: RefreshIndicator(
-              //   onRefresh: () async {
-              //     // cubit.fetchContacts();
-              //     // await cubit.getRecord();
-              //     print('kkkkkk : ${cubit.r}');
-              //   },
-              //   child: Center(
-              //     child: ListView.separated(
-              //       itemCount: rr.length,
-              //       itemBuilder: (context, index) {
-              //         return buildListItem(rr[index], context);
-              //       },
-              //       separatorBuilder: (context, index) => buildSeparator(),
-              //     ),
-                      body: FutureBuilder(
+                      body: !isDeviceConnected ?
+                      ListView.separated(
+                          separatorBuilder: (context, index) => Padding(
+                            padding: const EdgeInsetsDirectional.only(start: 20.0),
+                            child: Container(
+                              width: double.infinity,
+                              height: 1,
+                              color: Colors.grey[400],
+                            ),
+                          ),
+                          itemCount: cubit.tasks.length,
+                          itemBuilder: (context, index) => buildListItemSql(cubit.tasks[index],context))
+                      :
+                      FutureBuilder(
                           future: cubit.fetchContacts(),
                           builder: (BuildContext context,
                               AsyncSnapshot<dynamic> snapshot) {
@@ -204,7 +296,27 @@ class LoginResultScreen extends StatelessWidget {
             );
           },
         );
-      },
-    );
   }
+  showDialogBox() => showCupertinoDialog<String>(
+    context: context,
+    builder: (BuildContext context) => CupertinoAlertDialog(
+      title: const Text('No Connection'),
+      content: const Text('Please check your internet connectivity'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(context, 'Cancel');
+            setState(() => isAlertSet = false);
+            isDeviceConnected =
+            await InternetConnectionChecker().hasConnection;
+            if (!isDeviceConnected && isAlertSet == false) {
+              showDialogBox();
+              setState(() => isAlertSet = true);
+            }
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
 }
